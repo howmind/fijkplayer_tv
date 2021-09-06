@@ -497,6 +497,12 @@ class FijkPlayer extends ChangeNotifier implements ValueListenable<FijkValue> {
     }
   }
 
+  Future<int?> getTcpSpeed() async {
+    await _nativeSetup.future;
+    FijkLog.i("$this getTcpSpeed");
+    return _channel.invokeMethod("getTcpSpeed");
+  }
+
   void _eventListener(dynamic event) {
     final Map<dynamic, dynamic> map = event;
     switch (map['event']) {

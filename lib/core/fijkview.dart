@@ -122,11 +122,19 @@ class FijkView extends StatefulWidget {
     this.fit = FijkFit.contain,
     this.fsFit = FijkFit.contain,
     this.panelBuilder = defaultFijkPanelBuilder,
+    this.fullscreenPanelBuilder,
     this.color = const Color(0xFF607D8B),
     this.cover,
     this.fs = true,
     this.onDispose,
+    this.focusNode,
+    this.onFocusChange,
+    this.onKey,
   });
+
+  final FocusNode? focusNode;
+  final ValueChanged<bool>? onFocusChange;
+  final FocusOnKeyCallback? onKey;
 
   /// The player that need display video by this [FijkView].
   /// Will be passed to [panelBuilder].
@@ -134,6 +142,7 @@ class FijkView extends StatefulWidget {
 
   /// builder to build panel Widget
   final FijkPanelWidgetBuilder panelBuilder;
+  final FijkPanelWidgetBuilder? fullscreenPanelBuilder;
 
   /// This method will be called when fijkView dispose.
   /// FijkData is managed inner FijkView. User can change fijkData in custom panel.
@@ -531,43 +540,61 @@ class __InnerFijkViewState extends State<_InnerFijkView> {
     }
     _videoRender = value.videoRenderStart;
 
-    return LayoutBuilder(builder: (ctx, constraints) {
-      // get child size
-      final Size childSize = getTxSize(constraints, _fit);
-      final Offset offset = getTxOffset(constraints, childSize, _fit);
-      final Rect pos = Rect.fromLTWH(
-          offset.dx, offset.dy, childSize.width, childSize.height);
+    return Focus(
+      autofocus: true,
+      focusNode: fView.focusNode,
+      onFocusChange: fView.onFocusChange,
+      onKey: fView.onKey,
+      child: LayoutBuilder(builder: (ctx, constraints) {
+        // get child size
+        final Size childSize = getTxSize(constraints, _fit);
+        final Offset offset = getTxOffset(constraints, childSize, _fit);
+        final Rect pos = Rect.fromLTWH(
+            offset.dx, offset.dy, childSize.width, childSize.height);
 
-      List ws = <Widget>[
-        Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          color: _color,
-        ),
-        Positioned.fromRect(
-            rect: pos,
-            child: Container(
-              color: Color(0xFF000000),
-              child: buildTexture(),
-            )),
-      ];
-
-      if (widget.cover != null && !value.videoRenderStart) {
-        ws.add(Positioned.fromRect(
-          rect: pos,
-          child: Image(
-            image: widget.cover!,
-            fit: BoxFit.fill,
+        List ws = <Widget>[
+          Container(
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            color: _color,
           ),
-        ));
-      }
+          Positioned.fromRect(
+              rect: pos,
+              child: Container(
+                color: Color(0xFF000000),
+                child: buildTexture(),
+              )),
+        ];
 
-      if (_panelBuilder != null) {
-        ws.add(_panelBuilder!(_player, data, ctx, constraints.biggest, pos));
-      }
-      return Stack(
-        children: ws as List<Widget>,
-      );
-    });
+        if (widget.cover != null && !value.videoRenderStart) {
+          ws.add(Positioned.fromRect(
+            rect: pos,
+            child: Image(
+              image: widget.cover!,
+              fit: BoxFit.fill,
+            ),
+          ));
+        }
+
+        if (widget.fullScreen) {
+          if (fView.fullscreenPanelBuilder != null) {
+            ws.add(fView.fullscreenPanelBuilder!(
+                _player, data, ctx, constraints.biggest, pos));
+          } else {
+            ws.add(
+                _panelBuilder!(_player, data, ctx, constraints.biggest, pos));
+          }
+        } else {
+          if (_panelBuilder != null) {
+            ws.add(
+                _panelBuilder!(_player, data, ctx, constraints.biggest, pos));
+          }
+        }
+
+        return Stack(
+          children: ws as List<Widget>,
+        );
+      }),
+    );
   }
 }

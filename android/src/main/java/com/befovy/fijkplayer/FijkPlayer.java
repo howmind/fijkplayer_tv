@@ -486,7 +486,10 @@ public class FijkPlayer implements MethodChannel.MethodCallHandler, IjkEventList
                 mMethodChannel.invokeMethod("_onSnapshot", "not support");
             }
             result.success(null);
-        } else {
+        } else if(call.method.equals("getTcpSpeed")){
+            long tcpSpeed = mIjkMediaPlayer.getTcpSpeed();
+            result.success(tcpSpeed);
+        }else {
             result.notImplemented();
         }
     }
