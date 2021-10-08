@@ -1,3 +1,19 @@
+# support android TV
+* add fullscreen panel builder, so custom the two panel layout between window and fullscreen.
+* support FijkView to receive the focus event, so can handle the D-Pad select event on FijkView
+``` dart
+  FijkView({
+    ...
+    this.panelBuilder = defaultFijkPanelBuilder, // for normal window
+    this.fullscreenPanelBuilder, //for fullscreen
+    this.focusNode,
+    this.onFocusChange,
+    this.onKey,
+  });
+```
+* add getTcpSpeed(), but not available on .m3u8 video stream.
+---
+
 # fijkplayer (Video player plugin for Flutter) Flutter 媒体播放器
 
 ✨ **[手把手带你写 Flutter 系统音量插件](https://www.yuque.com/befovy/share/flutter_volume)**  ✨  **[Flutter 多版本管理工具 fvm](https://github.com/befovy/fvm)** ✨
